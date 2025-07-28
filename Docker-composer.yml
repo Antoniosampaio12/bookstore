@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:13
+    volumes:
+      - postgres_volume:/var/lib/postgresql/data
+      - ./dockerConfig/postgres-dev-init.sql:/docker-entrypoint-initdb.d/init.sql 
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 5432:5432
+
+  backend:
+    container_name: bookstore_backend
+    restart: always
+    depends_on:
+      - postgres
+   
+    build:
+      context: ./backend
+      target: dependencies
+    ports:
+      - ${PORT}:${PORT}
+      - 9229:9229
+    env_file:
+      - .env
+    environment:
+      - PG_HOST=postgres
+
+    volumes:
+      - ./:/home/node/app
+    command: dumb-init node ace serve --watch --node-args="--inspect=0.0.0.0"
+
+  frontend:
+    container_name: bookstore_frontend
+    build:
+      context: ./frontend
+    ports:
+      - 4200:80
+    depends_on:
+      - bookstore_app
+
+volumes:
+  postgres_volume:
+

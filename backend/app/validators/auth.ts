@@ -4,7 +4,7 @@ import vine from '@vinejs/vine'
 //prevenindo inconsistencias  e insegurança nos dados
 export const registerValidator = vine.compile(
     vine.object({
-        name: vine.string(),
+        name: vine.string().trim(),
         email: vine.string().email().toLowerCase().normalizeEmail().trim()
         .unique( async (db, value) => {
             const match = await db.from('users').select('id')

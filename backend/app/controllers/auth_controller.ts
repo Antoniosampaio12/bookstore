@@ -1,8 +1,7 @@
 import User from '#models/user'
 import { loginValidator, registerValidator } from '#validators/auth'
 import type { HttpContext } from '@adonisjs/core/http'
-import { messages } from '@vinejs/vine/defaults'
-import { create } from 'domain'
+
 
 export default class AuthController {
 
@@ -14,7 +13,7 @@ export default class AuthController {
         const user = await User.create(data)
       
         return {
-            message: 'User registered with sucess',
+            message: 'Usuário registrado com sucesso!',
             user: user
         }
     }
@@ -33,7 +32,7 @@ export default class AuthController {
         const user = auth.user!
         // deleta no banco o token atual
         await User.accessTokens.delete(user,user.currentAccessToken.identifier)
-        return {message: 'Logout Sucess'}
+        return {message: 'Desconectado com sucesso!'}
     }
 
     // mostrar as informações so usuario logado

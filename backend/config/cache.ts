@@ -11,8 +11,8 @@ const cacheConfig = defineConfig({
     default: store()
       .useL1Layer(drivers.memory())
     
-      .useL2Layer(drivers.file({
-        directory: app.tmpPath('cache')
+      .useL2Layer(drivers.redis({ connectionName: 'main'
+      
       }))
     
   }

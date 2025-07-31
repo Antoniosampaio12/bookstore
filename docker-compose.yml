@@ -11,11 +11,21 @@ services:
     ports:
       - 5432:5432
 
+  redis:
+    container_name: redis
+    image: redis:6-alpine
+    volumes:
+      - redis_volume:/data
+    ports:
+      - 6379:6379
+
   backend:
     container_name: bookstore_backend
     restart: always
     depends_on:
       - postgres
+      - redis
+
     build:
       context: ./backend
       target: dependencies
@@ -26,6 +36,7 @@ services:
       - ./backend/.env
     environment:
       PG_HOST: postgres
+      REDIS_HOST: redis
     volumes:
       - ./backend:/home/node/app
     command: dumb-init node --inspect=0.0.0.0 ace serve --watch
@@ -41,3 +52,4 @@ services:
 
 volumes:
   postgres_volume:
+  redis_volume:

@@ -72,8 +72,8 @@ export class BookListComponent implements OnInit {
       title: this.searchForm.get('title')?.value || undefined,
       author: this.searchForm.get('author')?.value || undefined,
       genre: this.searchForm.get('genre')?.value || undefined,
-      page,
-      limit: this.limit
+      page: page,
+      limit: this.limit || 10
     };
 
     // Remove empty values
@@ -83,14 +83,61 @@ export class BookListComponent implements OnInit {
       }
     });
 
+    // Garantir que page e limit sempre sejam enviados
+    if (!searchParams.page) searchParams.page = 1;
+    if (!searchParams.limit) searchParams.limit = 10;
+
+    //console.log('Loading books with params:', searchParams);
+
     this.booksService.getBooks(searchParams).subscribe({
       next: (response) => {
-        this.books = response.data || response as any;
-        if (response.meta) {
-          this.currentPage = response.meta.page;
-          this.totalPages = response.meta.totalPages;
-          this.total = response.meta.total;
+        //console.log('Full response from backend:', response);
+        
+        // Inicializar valores padrão
+        this.currentPage = searchParams.page || 1;
+        this.limit = searchParams.limit || 10;
+        
+        // Verificar se a resposta tem estrutura de paginação
+        if (response.data && Array.isArray(response.data)) {
+          // Resposta com paginação: { data: [], meta: { ... } }
+          this.books = response.data;
+          if (response.meta) {
+            this.currentPage = response.meta.page || this.currentPage;
+            this.totalPages = response.meta.totalPages || Math.ceil((response.meta.total || 0) / this.limit);
+            this.total = response.meta.total;
+          } else {
+            // Se não tem meta, usar o total da resposta ou calcular
+            this.total = (response as any).total || response.data.length;
+            this.totalPages = Math.ceil(this.total / this.limit);
+          }
+        } else if (Array.isArray(response)) {
+          // Resposta é um array direto
+          this.books = response;
+          this.total = response.length;
+          this.totalPages = Math.ceil(this.total / this.limit);
+        } else if ((response as any).total !== undefined) {
+          // Resposta tem total mas estrutura diferente
+          this.books = (response as any).data || [];
+          this.total = (response as any).total;
+          this.totalPages = Math.ceil(this.total / this.limit);
+        } else {
+          // Fallback para outros formatos
+          if (Array.isArray(response)) {
+            this.books = response;
+          } else {
+            this.books = (response as any).data || [];
+          }
+          this.total = this.books.length;
+          this.totalPages = Math.ceil(this.total / this.limit);
         }
+        /*
+        console.log('Pagination data:', {
+          currentPage: this.currentPage,
+          totalPages: this.totalPages,
+          total: this.total,
+          booksCount: this.books.length
+        });*/
+        
         this.loading = false;
       },
       error: (error) => {

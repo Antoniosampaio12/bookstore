@@ -101,23 +101,6 @@
   font-weight: 500;
 }
 
-.book-description {
-  margin-bottom: 2rem;
-}
-
-.book-description h3 {
-  color: #2d3748;
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-}
-
-.book-description p {
-  color: #4a5568;
-  line-height: 1.7;
-  font-size: 1rem;
-  margin: 0;
-}
 
 .book-metadata {
   padding-top: 1.5rem;

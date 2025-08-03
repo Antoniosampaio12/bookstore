@@ -64,7 +64,7 @@ export class AuthService {
     return this.http.get<ProfileResponse>(`${this.apiUrl}/me`, {
       headers: this.getAuthHeaders()
     }).pipe(
-      tap(response => console.log('Profile response:', response)), // Para debug
+      //tap(response => console.log('Profile response:', response)), // Para debug
       map(response => response.user)
     );
   }

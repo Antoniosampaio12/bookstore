@@ -29,7 +29,7 @@ export class BookFormComponent implements OnInit {
       title: ['', [Validators.required, Validators.minLength(2)]],
       author: ['', [Validators.required, Validators.minLength(2)]],
       genre: ['', [Validators.required]],
-      publishedYear: ['', [Validators.min(1000), Validators.max(new Date().getFullYear())]],
+      year: ['', [Validators.min(1000), Validators.max(new Date().getFullYear())]],
       isbn: ['']
     });
   }

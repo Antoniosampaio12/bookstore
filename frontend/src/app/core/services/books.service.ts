@@ -8,10 +8,10 @@ export interface Book {
   title: string;
   author: string;
   genre: string;
-  description?: string;
-  publishedYear?: number;
+ 
+  year?: number;
   isbn?: string;
-  pages?: number;
+
   createdAt?: string;
   updatedAt?: string;
 }
@@ -62,8 +62,14 @@ export class BooksService {
       if (params.genre) httpParams = httpParams.set('genre', params.genre);
       if (params.page) httpParams = httpParams.set('page', params.page.toString());
       if (params.limit) httpParams = httpParams.set('limit', params.limit.toString());
+    } else {
+      // Definir valores padrão se não houver parâmetros
+      httpParams = httpParams.set('page', '1');
+      httpParams = httpParams.set('limit', '10');
     }
 
+   // console.log('Request params:', httpParams.toString());
+    
     return this.http.get<BooksResponse>(this.apiUrl, { params: httpParams });
   }
 

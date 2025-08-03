@@ -64,18 +64,18 @@
         </div>
 
         <div class="form-group">
-          <label for="publishedYear">Ano de Publicação</label>
+          <label for="year">Ano de Publicação</label>
           <input
-            id="publishedYear"
+            id="year"
             type="number"
-            formControlName="publishedYear"
+            formControlName="year"
             placeholder="Ex: 2023"
             min="1000"
             [max]="currentYear"
-            [class.error]="isFieldInvalid('publishedYear')"
+            [class.error]="isFieldInvalid('year')"
           >
-          <div *ngIf="getFieldError('publishedYear')" class="error-message">
-            {{ getFieldError('publishedYear') }}
+          <div *ngIf="getFieldError('year')" class="error-message">
+            {{ getFieldError('year') }}
           </div>
         </div>
 

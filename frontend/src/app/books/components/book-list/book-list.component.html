@@ -1,0 +1,206 @@
+<div class="books-container">
+  <!-- Header -->
+  <div class="books-header">
+    <h1>📚 Gerenciamento de Livros</h1>
+    <div class="header-actions">
+      <button 
+        *ngIf="isAuthenticated"
+        type="button" 
+        class="btn btn-primary"
+        (click)="createBook()">
+        <i class="icon">➕</i>
+        Novo Livro
+      </button>
+    </div>
+  </div>
+
+  <!-- Message Display -->
+  <div *ngIf="message" class="message" [class]="'message-' + messageType">
+    {{ message }}
+  </div>
+
+  <!-- Search Form -->
+  <div class="search-section">
+    <h3>🔍 Buscar Livros</h3>
+    <form [formGroup]="searchForm" (ngSubmit)="onSearch()" class="search-form">
+      <div class="search-grid">
+        <div class="form-group">
+          <label for="search-title">Título</label>
+          <input
+            id="search-title"
+            type="text"
+            formControlName="title"
+            placeholder="Digite o título..."
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="search-author">Autor</label>
+          <input
+            id="search-author"
+            type="text"
+            formControlName="author"
+            placeholder="Digite o autor..."
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="search-genre">Gênero</label>
+          <input
+            id="search-genre"
+            type="text"
+            formControlName="genre"
+            placeholder="Digite o gênero..."
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="search-limit">Itens por página</label>
+          <select id="search-limit" formControlName="limit">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="search-actions">
+        <button type="submit" class="btn btn-primary" [disabled]="loading">
+          <span *ngIf="loading" class="loading-spinner"></span>
+          {{ loading ? 'Buscando...' : 'Buscar' }}
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="clearSearch()">
+          Limpar
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Books List -->
+  <div class="books-section">
+    <div class="books-header-info">
+      <h3>📖 Lista de Livros</h3>
+      <span *ngIf="total > 0" class="books-count">
+        {{ total }} livro(s) encontrado(s)
+      </span>
+    </div>
+
+    <div *ngIf="loading && books.length === 0" class="loading-state">
+      <div class="loading-spinner large"></div>
+      <p>Carregando livros...</p>
+    </div>
+
+    <div *ngIf="!loading && books.length === 0" class="empty-state">
+      <div class="empty-icon">📚</div>
+      <h3>Nenhum livro encontrado</h3>
+      <p>Tente ajustar os filtros de busca ou adicione um novo livro.</p>
+    </div>
+
+    <div *ngIf="books.length > 0" class="books-grid">
+      <div *ngFor="let book of books" class="book-card">
+        <div class="book-header">
+          <h4>{{ book.title }}</h4>
+          <div class="book-actions">
+            <button 
+              type="button" 
+              class="btn-icon btn-view"
+              (click)="viewBook(book)"
+              title="Ver detalhes">
+              👁️
+            </button>
+            <button 
+              *ngIf="isAuthenticated"
+              type="button" 
+              class="btn-icon btn-edit"
+              (click)="editBook(book)"
+              title="Editar">
+              ✏️
+            </button>
+            <button 
+              *ngIf="isAuthenticated"
+              type="button" 
+              class="btn-icon btn-delete"
+              (click)="deleteBook(book)"
+              title="Excluir">
+              🗑️
+            </button>
+          </div>
+        </div>
+        
+        <div class="book-info">
+          <p><strong>Autor:</strong> {{ book.author }}</p>
+          <p><strong>Gênero:</strong> {{ book.genre }}</p>
+          <p *ngIf="book.publishedYear"><strong>Ano:</strong> {{ book.publishedYear }}</p>
+          <p *ngIf="book.pages"><strong>Páginas:</strong> {{ book.pages }}</p>
+        </div>
+
+        <div *ngIf="book.description" class="book-description">
+          <p>{{ book.description | slice:0:100 }}{{ book.description && book.description.length > 100 ? '...' : '' }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="totalPages > 1" class="pagination">
+      <button 
+        type="button" 
+        class="btn btn-secondary"
+        [disabled]="currentPage === 1"
+        (click)="goToPage(currentPage - 1)">
+        ← Anterior
+      </button>
+      
+      <span class="pagination-info">
+        Página {{ currentPage }} de {{ totalPages }}
+      </span>
+      
+      <button 
+        type="button" 
+        class="btn btn-secondary"
+        [disabled]="currentPage === totalPages"
+        (click)="goToPage(currentPage + 1)">
+        Próxima →
+      </button>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div *ngIf="showDeleteConfirmation" class="modal-overlay">
+    <div class="modal-content confirmation-modal">
+      <div class="modal-header">
+        <h3>🗑️ Confirmar Exclusão</h3>
+      </div>
+      
+      <div class="confirmation-content">
+        <p>Tem certeza que deseja excluir o livro:</p>
+        <strong>"{{ selectedBook?.title }}"</strong>
+        <p class="warning-text">Esta ação não pode ser desfeita.</p>
+      </div>
+      
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="cancelDelete()">
+          Cancelar
+        </button>
+        <button type="button" class="btn btn-danger" (click)="confirmDelete()">
+          <span *ngIf="loading" class="loading-spinner"></span>
+          {{ loading ? 'Excluindo...' : 'Excluir' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div *ngIf="showSuccessModal" class="modal-overlay" (click)="closeSuccessModal()">
+    <div class="modal-content success-modal" (click)="$event.stopPropagation()">
+      <div class="success-content">
+        <div class="success-icon">✅</div>
+        <h3>Sucesso!</h3>
+        <p>{{ successMessage }}</p>
+        <button type="button" class="btn btn-primary" (click)="closeSuccessModal()">
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

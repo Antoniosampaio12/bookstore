@@ -1,1 +1,121 @@
-<p>book-form works!</p>
+<div class="book-form-container">
+  <div class="book-form-card">
+    <div class="form-header">
+      <button type="button" class="btn-back" (click)="goBack()">
+        ← Voltar
+      </button>
+      <h1>{{ isEditMode ? '✏️ Editar Livro' : '➕ Novo Livro' }}</h1>
+    </div>
+
+    <!-- Message Display -->
+    <div *ngIf="message" class="message" [class]="'message-' + messageType">
+      {{ message }}
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading && isEditMode" class="loading-state">
+      <div class="loading-spinner large"></div>
+      <p>Carregando dados do livro...</p>
+    </div>
+
+    <!-- Book Form -->
+    <form *ngIf="!loading || !isEditMode" [formGroup]="bookForm" (ngSubmit)="onSubmit()" class="book-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="title">Título *</label>
+          <input
+            id="title"
+            type="text"
+            formControlName="title"
+            placeholder="Digite o título do livro"
+            [class.error]="isFieldInvalid('title')"
+          >
+          <div *ngIf="getFieldError('title')" class="error-message">
+            {{ getFieldError('title') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="author">Autor *</label>
+          <input
+            id="author"
+            type="text"
+            formControlName="author"
+            placeholder="Digite o nome do autor"
+            [class.error]="isFieldInvalid('author')"
+          >
+          <div *ngIf="getFieldError('author')" class="error-message">
+            {{ getFieldError('author') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="genre">Gênero *</label>
+          <input
+            id="genre"
+            type="text"
+            formControlName="genre"
+            placeholder="Digite o gênero"
+            [class.error]="isFieldInvalid('genre')"
+          >
+          <div *ngIf="getFieldError('genre')" class="error-message">
+            {{ getFieldError('genre') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="publishedYear">Ano de Publicação</label>
+          <input
+            id="publishedYear"
+            type="number"
+            formControlName="publishedYear"
+            placeholder="Ex: 2023"
+            min="1000"
+            [max]="currentYear"
+            [class.error]="isFieldInvalid('publishedYear')"
+          >
+          <div *ngIf="getFieldError('publishedYear')" class="error-message">
+            {{ getFieldError('publishedYear') }}
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="isbn">ISBN</label>
+          <input
+            id="isbn"
+            type="text"
+            formControlName="isbn"
+            placeholder="Ex: 978-3-16-148410-0"
+          >
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="goBack()">
+          Cancelar
+        </button>
+        <button 
+          type="submit" 
+          class="btn btn-primary"
+          [disabled]="loading || bookForm.invalid">
+          <span *ngIf="loading" class="loading-spinner"></span>
+          {{ loading ? 'Salvando...' : (isEditMode ? 'Atualizar' : 'Criar') }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Success Modal -->
+  <div *ngIf="showSuccessModal" class="modal-overlay" (click)="closeSuccessModal()">
+    <div class="modal-content success-modal" (click)="$event.stopPropagation()">
+      <div class="success-content">
+        <div class="success-icon">✅</div>
+        <h3>Sucesso!</h3>
+        <p>{{ successMessage }}</p>
+        <button type="button" class="btn btn-primary" (click)="closeSuccessModal()">
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

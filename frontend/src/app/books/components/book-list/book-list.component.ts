@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BooksService, Book, BookSearchParams } from '../../../core/services/books.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { ErrorMapperService } from '../../../core/services/error-mapper.service';
 
 @Component({
   selector: 'app-book-list',
@@ -36,7 +37,8 @@ export class BookListComponent implements OnInit {
     private fb: FormBuilder,
     private booksService: BooksService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private errorMapper: ErrorMapperService
   ) {
     this.searchForm = this.fb.group({
       title: [''],
@@ -87,11 +89,11 @@ export class BookListComponent implements OnInit {
     if (!searchParams.page) searchParams.page = 1;
     if (!searchParams.limit) searchParams.limit = 10;
 
-    //console.log('Loading books with params:', searchParams);
+    console.log('Loading books with params:', searchParams);
 
     this.booksService.getBooks(searchParams).subscribe({
       next: (response) => {
-        //console.log('Full response from backend:', response);
+        console.log('Full response from backend:', response);
         
         // Inicializar valores padrão
         this.currentPage = searchParams.page || 1;
@@ -130,19 +132,20 @@ export class BookListComponent implements OnInit {
           this.total = this.books.length;
           this.totalPages = Math.ceil(this.total / this.limit);
         }
-        /*
+        
         console.log('Pagination data:', {
           currentPage: this.currentPage,
           totalPages: this.totalPages,
           total: this.total,
           booksCount: this.books.length
-        });*/
+        });
         
         this.loading = false;
       },
       error: (error) => {
         this.loading = false;
-        this.showMessage('Erro ao carregar livros. Tente novamente.', 'error');
+        const mappedError = this.errorMapper.mapError(error);
+        this.showMessage(mappedError.message, 'error');
         console.error('Error loading books:', error);
       }
     });
@@ -201,7 +204,8 @@ export class BookListComponent implements OnInit {
         },
         error: (error) => {
           this.loading = false;
-          this.showMessage(error.error?.message || 'Erro ao excluir livro.', 'error');
+          const mappedError = this.errorMapper.mapError(error);
+          this.showMessage(mappedError.message, 'error');
           this.selectedBook = null;
         }
       });

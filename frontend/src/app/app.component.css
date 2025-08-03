@@ -64,6 +64,18 @@
   border-color: rgba(255, 255, 255, 0.5);
 }
 
+.btn-primary {
+  background: rgba(102, 126, 234, 0.9);
+  color: white;
+  border: 2px solid rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary:hover {
+  background: rgba(102, 126, 234, 1);
+  border-color: rgba(102, 126, 234, 0.5);
+  transform: translateY(-1px);
+}
+
 .btn-danger {
   background: rgba(239, 68, 68, 0.9);
   color: white;

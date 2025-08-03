@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BooksService, Book } from '../../../core/services/books.service';
+import { ErrorMapperService, MappedError } from '../../../core/services/error-mapper.service';
 
 @Component({
   selector: 'app-book-form',
@@ -14,23 +15,35 @@ export class BookFormComponent implements OnInit {
   loading = false;
   message = '';
   messageType: 'success' | 'error' | '' = '';
+  mappedError: MappedError | null = null;
   isEditMode = false;
   bookId: number | null = null;
   showSuccessModal = false;
   successMessage = '';
   currentYear: number = new Date().getFullYear();
+
+  // Mapeamento de campos para nomes amigáveis
+  private fieldLabels: { [key: string]: string } = {
+    title: 'Título',
+    author: 'Autor',
+    genre: 'Gênero',
+    year: 'Ano de Publicação',
+    isbn: 'ISBN'
+  };
+
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private booksService: BooksService
+    private booksService: BooksService,
+    private errorMapper: ErrorMapperService
   ) {
     this.bookForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(2)]],
       author: ['', [Validators.required, Validators.minLength(2)]],
       genre: ['', [Validators.required]],
       year: ['', [Validators.min(1000), Validators.max(new Date().getFullYear())]],
-      isbn: ['']
+      isbn: ['', [Validators.required]]
     });
   }
 
@@ -61,7 +74,7 @@ export class BookFormComponent implements OnInit {
   onSubmit(): void {
     if (this.bookForm.valid) {
       this.loading = true;
-      this.clearMessage();
+      this.clearMessages();
 
       const bookData = this.bookForm.value;
 
@@ -73,7 +86,8 @@ export class BookFormComponent implements OnInit {
           },
           error: (error) => {
             this.loading = false;
-            this.showMessage(error.error?.message || 'Erro ao atualizar livro.', 'error');
+            this.mappedError = this.errorMapper.mapError(error);
+            this.showMessage(this.mappedError.message, 'error');
           }
         });
       } else {
@@ -84,7 +98,8 @@ export class BookFormComponent implements OnInit {
           },
           error: (error) => {
             this.loading = false;
-            this.showMessage(error.error?.message || 'Erro ao criar livro.', 'error');
+            this.mappedError = this.errorMapper.mapError(error);
+            this.showMessage(this.mappedError.message, 'error');
           }
         });
       }
@@ -113,7 +128,7 @@ export class BookFormComponent implements OnInit {
   private showMessage(message: string, type: 'success' | 'error'): void {
     this.message = message;
     this.messageType = type;
-    setTimeout(() => this.clearMessage(), 5000);
+    setTimeout(() => this.clearMessages(), 5000);
   }
 
   private showSuccessMessage(message: string): void {
@@ -121,18 +136,27 @@ export class BookFormComponent implements OnInit {
     this.showSuccessModal = true;
   }
 
-  private clearMessage(): void {
+  private clearMessages(): void {
     this.message = '';
     this.messageType = '';
+    this.mappedError = null;
   }
 
   getFieldError(fieldName: string): string {
+    // Primeiro verifica erros mapeados
+    if (this.mappedError) {
+      const mappedFieldError = this.errorMapper.getFieldError(this.mappedError, fieldName);
+      if (mappedFieldError) return mappedFieldError;
+    }
+    
+    // Depois verifica erros de validação do formulário
     const field = this.bookForm.get(fieldName);
     if (field?.errors && field.touched) {
-      if (field.errors['required']) return `${fieldName} é obrigatório`;
+      const fieldLabel = this.fieldLabels[fieldName] || fieldName;
+      if (field.errors['required']) return `${fieldLabel} é obrigatório`;
       if (field.errors['minlength']) {
         const requiredLength = field.errors['minlength'].requiredLength;
-        return `${fieldName} deve ter pelo menos ${requiredLength} caracteres`;
+        return `${fieldLabel} deve ter pelo menos ${requiredLength} caracteres`;
       }
       if (field.errors['min']) return `Valor mínimo: ${field.errors['min'].min}`;
       if (field.errors['max']) return `Valor máximo: ${field.errors['max'].max}`;
@@ -141,6 +165,11 @@ export class BookFormComponent implements OnInit {
   }
 
   isFieldInvalid(fieldName: string): boolean {
+    // Campo é inválido se tem erro mapeado ou erro de validação local
+    if (this.mappedError && this.errorMapper.hasFieldError(this.mappedError, fieldName)) {
+      return true;
+    }
+    
     const field = this.bookForm.get(fieldName);
     return !!(field?.errors && field.touched);
   }

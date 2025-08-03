@@ -23,11 +23,7 @@ export class AppComponent implements OnInit {
     this.authService.isAuthenticated$.subscribe(
       (authenticated) => {
         this.isAuthenticated = authenticated;
-        if (authenticated) {
-          this.router.navigate(['/books']);
-        } else {
-          this.router.navigate(['/auth']);
-        }
+        // Não redireciona automaticamente, deixa o usuário na página atual
       }
     );
   }
@@ -36,11 +32,11 @@ export class AppComponent implements OnInit {
     this.authService.logout().subscribe({
       next: () => {
         // Logout realizado com sucesso
-        //console.log('Logout realizado com sucesso');
+        console.log('Logout realizado com sucesso');
       },
       error: (error) => {
         // Mesmo com erro, o token local foi removido
-        // console.error('Erro durante logout:', error);
+        console.error('Erro durante logout:', error);
       }
     });
   }

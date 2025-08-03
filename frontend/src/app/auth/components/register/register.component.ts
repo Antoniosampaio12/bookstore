@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService, RegisterData } from '../../../core/services/auth.service';
+import { ErrorMapperService, MappedError } from '../../../core/services/error-mapper.service';
 
 @Component({
   selector: 'app-register',
@@ -14,11 +15,19 @@ export class RegisterComponent {
   loading = false;
   message = '';
   messageType: 'success' | 'error' | '' = '';
+  mappedError: MappedError | null = null;
 
+  // Mapeamento de campos para nomes amigáveis
+  private fieldLabels: { [key: string]: string } = {
+    name: 'Nome',
+    email: 'E-mail',
+    password: 'Senha'
+  };
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private errorMapper: ErrorMapperService
   ) {
     this.registerForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
@@ -30,7 +39,7 @@ export class RegisterComponent {
   onRegister(): void {
     if (this.registerForm.valid) {
       this.loading = true;
-      this.clearMessage();
+      this.clearMessages();
 
       const registerData: RegisterData = this.registerForm.value;
 
@@ -44,7 +53,8 @@ export class RegisterComponent {
         },
         error: (error) => {
           this.loading = false;
-          this.showMessage(error.error?.message || 'Erro ao realizar registro. Tente novamente.', 'error');
+          this.mappedError = this.errorMapper.mapError(error);
+          this.showMessage(this.mappedError.message, 'error');
         }
       });
     } else {
@@ -62,28 +72,42 @@ export class RegisterComponent {
   private showMessage(message: string, type: 'success' | 'error'): void {
     this.message = message;
     this.messageType = type;
-    setTimeout(() => this.clearMessage(), 5000);
+    setTimeout(() => this.clearMessages(), 5000);
   }
 
-  private clearMessage(): void {
+  private clearMessages(): void {
     this.message = '';
     this.messageType = '';
+    this.mappedError = null;
   }
 
   getFieldError(fieldName: string): string {
+    // Primeiro verifica erros mapeados
+    if (this.mappedError) {
+      const mappedFieldError = this.errorMapper.getFieldError(this.mappedError, fieldName);
+      if (mappedFieldError) return mappedFieldError;
+    }
+    
+    // Depois verifica erros de validação do formulário
     const field = this.registerForm.get(fieldName);
     if (field?.errors && field.touched) {
-      if (field.errors['required']) return `${fieldName} é obrigatório`;
-      if (field.errors['email']) return 'Email inválido';
+      const fieldLabel = this.fieldLabels[fieldName] || fieldName;
+      if (field.errors['required']) return `${fieldLabel} é obrigatório`;
+      if (field.errors['email']) return 'Formato de e-mail inválido';
       if (field.errors['minlength']) {
         const requiredLength = field.errors['minlength'].requiredLength;
-        return `${fieldName} deve ter pelo menos ${requiredLength} caracteres`;
+        return `${fieldLabel} deve ter pelo menos ${requiredLength} caracteres`;
       }
     }
     return '';
   }
 
   isFieldInvalid(fieldName: string): boolean {
+    // Campo é inválido se tem erro mapeado ou erro de validação local
+    if (this.mappedError && this.errorMapper.hasFieldError(this.mappedError, fieldName)) {
+      return true;
+    }
+    
     const field = this.registerForm.get(fieldName);
     return !!(field?.errors && field.touched);
   }

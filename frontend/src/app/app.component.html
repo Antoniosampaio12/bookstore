@@ -1,11 +1,27 @@
 <div class="app-container">
   <!-- Navigation Header -->
-  <header *ngIf="isAuthenticated" class="app-header">
+  <header class="app-header">
     <div class="header-content">
       <h1 class="app-title">📚 Sistema de Livros</h1>
       <nav class="nav-actions">
-
-        <div class="profile-container">
+        <button 
+          type="button" 
+          class="btn btn-outline"
+          routerLink="/books">
+          📖 Livros
+        </button>
+        
+        <!-- Botões para usuários não autenticados -->
+        <button 
+          *ngIf="!isAuthenticated"
+          type="button" 
+          class="btn btn-primary"
+          routerLink="/auth">
+          🔐 Entrar
+        </button>
+        
+        <!-- Botões para usuários autenticados -->
+        <div *ngIf="isAuthenticated" class="profile-container">
           <button 
             type="button" 
             class="btn btn-outline"
@@ -41,7 +57,9 @@
             </div>
           </div>
         </div>
+        
         <button 
+          *ngIf="isAuthenticated"
           type="button" 
           class="btn btn-danger"
           (click)="onLogout()">

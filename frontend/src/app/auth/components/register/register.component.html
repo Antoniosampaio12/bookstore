@@ -1,1 +1,74 @@
-<p>register works!</p>
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h2>📝 Registro</h2>
+      <p>Crie sua conta</p>
+    </div>
+
+    <!-- Message Display -->
+    <div *ngIf="message" class="message" [class]="'message-' + messageType">
+      {{ message }}
+    </div>
+
+    <!-- Register Form -->
+    <form [formGroup]="registerForm" (ngSubmit)="onRegister()" class="auth-form">
+      <div class="form-group">
+        <label for="name">Nome</label>
+        <input
+          id="name"
+          type="text"
+          formControlName="name"
+          placeholder="Seu nome completo"
+          [class.error]="isFieldInvalid('name')"
+        >
+        <div *ngIf="getFieldError('name')" class="error-message">
+          {{ getFieldError('name') }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="seu@email.com"
+          [class.error]="isFieldInvalid('email')"
+        >
+        <div *ngIf="getFieldError('email')" class="error-message">
+          {{ getFieldError('email') }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Senha</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          placeholder="Mínimo 6 caracteres"
+          [class.error]="isFieldInvalid('password')"
+        >
+        <div *ngIf="getFieldError('password')" class="error-message">
+          {{ getFieldError('password') }}
+        </div>
+      </div>
+
+      <button 
+        type="submit" 
+        class="btn btn-primary"
+        [disabled]="loading || registerForm.invalid">
+        <span *ngIf="loading" class="loading-spinner"></span>
+        {{ loading ? 'Registrando...' : 'Registrar' }}
+      </button>
+    </form>
+
+    <!-- Login Link -->
+    <div class="auth-footer">
+      <p>
+        Já tem uma conta?
+        <a routerLink="/auth/login" class="link">Faça login</a>
+      </p>
+    </div>
+  </div>
+</div>

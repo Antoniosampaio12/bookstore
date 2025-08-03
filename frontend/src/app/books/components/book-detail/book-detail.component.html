@@ -1,1 +1,79 @@
-<p>book-detail works!</p>
+<div class="book-detail-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="loading-spinner large"></div>
+    <p>Carregando detalhes do livro...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="message" class="message" [class]="'message-' + messageType">
+    {{ message }}
+  </div>
+
+  <!-- Book Details -->
+  <div *ngIf="!loading && book" class="book-detail-card">
+    <div class="book-detail-header">
+      <button type="button" class="btn-back" (click)="goBack()">
+        ← Voltar
+      </button>
+      <div *ngIf="isAuthenticated" class="header-actions">
+        <button type="button" class="btn btn-primary" (click)="editBook()">
+          ✏️ Editar
+        </button>
+      </div>
+    </div>
+
+    <div class="book-content">
+      <div class="book-main-info">
+        <h1 class="book-title">{{ book.title }}</h1>
+        <p class="book-author">por {{ book.author }}</p>
+      </div>
+
+      <div class="book-details-grid">
+        <div class="detail-item">
+          <strong>Gênero:</strong>
+          <span>{{ book.genre }}</span>
+        </div>
+
+        <div *ngIf="book.publishedYear" class="detail-item">
+          <strong>Ano de Publicação:</strong>
+          <span>{{ book.publishedYear }}</span>
+        </div>
+
+        <div *ngIf="book.pages" class="detail-item">
+          <strong>Páginas:</strong>
+          <span>{{ book.pages }}</span>
+        </div>
+
+        <div *ngIf="book.isbn" class="detail-item">
+          <strong>ISBN:</strong>
+          <span>{{ book.isbn }}</span>
+        </div>
+      </div>
+
+      <div *ngIf="book.description" class="book-description">
+        <h3>Descrição</h3>
+        <p>{{ book.description }}</p>
+      </div>
+
+      <div *ngIf="book.createdAt" class="book-metadata">
+        <p class="metadata-text">
+          Adicionado em: {{ book.createdAt | date:'dd/MM/yyyy HH:mm' }}
+        </p>
+        <p *ngIf="book.updatedAt && book.updatedAt !== book.createdAt" class="metadata-text">
+          Última atualização: {{ book.updatedAt | date:'dd/MM/yyyy HH:mm' }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Not Found State -->
+  <div *ngIf="!loading && !book && !message" class="not-found-state">
+    <div class="not-found-icon">📚</div>
+    <h2>Livro não encontrado</h2>
+    <p>O livro que você está procurando não existe ou foi removido.</p>
+    <button type="button" class="btn btn-primary" (click)="goBack()">
+      Voltar à lista
+    </button>
+  </div>
+</div>

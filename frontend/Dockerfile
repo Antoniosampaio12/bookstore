@@ -5,12 +5,17 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
-RUN npm run build --output-path=dist
+RUN npm run build 
 
-# Etapa 2: nginx para servir
+# Etapa 2: nginx para servir app Angular
 FROM nginx:alpine
 
-COPY --from=build /app/dist /usr/share/nginx/html
+# Copie os arquivos da build Angular para o local servido pelo Nginx
+COPY --from=build /app/dist/frontend/browser /usr/share/nginx/html
+
+# Substitua a config padrão do Nginx
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

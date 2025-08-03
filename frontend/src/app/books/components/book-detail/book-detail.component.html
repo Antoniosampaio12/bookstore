@@ -35,14 +35,9 @@
           <span>{{ book.genre }}</span>
         </div>
 
-        <div *ngIf="book.publishedYear" class="detail-item">
+        <div *ngIf="book.year" class="detail-item">
           <strong>Ano de Publicação:</strong>
-          <span>{{ book.publishedYear }}</span>
-        </div>
-
-        <div *ngIf="book.pages" class="detail-item">
-          <strong>Páginas:</strong>
-          <span>{{ book.pages }}</span>
+          <span>{{ book.year }}</span>
         </div>
 
         <div *ngIf="book.isbn" class="detail-item">
@@ -51,10 +46,6 @@
         </div>
       </div>
 
-      <div *ngIf="book.description" class="book-description">
-        <h3>Descrição</h3>
-        <p>{{ book.description }}</p>
-      </div>
 
       <div *ngIf="book.createdAt" class="book-metadata">
         <p class="metadata-text">

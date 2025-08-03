@@ -8,10 +8,10 @@ export interface Book {
   title: string;
   author: string;
   genre: string;
-  description?: string;
-  publishedYear?: number;
+ 
+  year?: number;
   isbn?: string;
-  pages?: number;
+
   createdAt?: string;
   updatedAt?: string;
 }

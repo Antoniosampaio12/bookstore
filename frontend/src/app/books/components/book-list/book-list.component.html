@@ -131,13 +131,11 @@
         <div class="book-info">
           <p><strong>Autor:</strong> {{ book.author }}</p>
           <p><strong>Gênero:</strong> {{ book.genre }}</p>
-          <p *ngIf="book.publishedYear"><strong>Ano:</strong> {{ book.publishedYear }}</p>
-          <p *ngIf="book.pages"><strong>Páginas:</strong> {{ book.pages }}</p>
+          <p *ngIf="book.year"><strong>Ano:</strong> {{ book.year }}</p>
+
         </div>
 
-        <div *ngIf="book.description" class="book-description">
-          <p>{{ book.description | slice:0:100 }}{{ book.description && book.description.length > 100 ? '...' : '' }}</p>
-        </div>
+       
       </div>
     </div>
 

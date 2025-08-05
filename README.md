@@ -27,6 +27,28 @@ Este é um projeto full-stack de catálogo de livros, construído com AdonisJS n
 ### Ferramentas Adicionais:
 - Docker + Docker Compose
 
+## Preparar variáveis de ambiente
+
+### Acesse o diretório backend
+```bash
+cd backend
+```
+
+### Copie o arquivo de exemplo
+```bash
+cp .env.example .env
+```
+
+### Gere uma chave segura para APP_KEY
+```bash
+node ace generate:key
+```
+
+### Volte à raiz do projeto
+```bash
+cd ..
+```
+
 ## Executando com Docker
 
 O projeto é configurado para rodar facilmente em contêineres Docker, garantindo um ambiente consistente para desenvolvimento e produção.
